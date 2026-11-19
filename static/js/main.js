@@ -51,14 +51,24 @@ function initMobileNav() {
   const navLinks = document.querySelector('.nav-links');
 
   if (burgerBtn && navLinks) {
-    burgerBtn.addEventListener('click', () => {
-      navLinks.classList.toggle('active');
+    burgerBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isActive = navLinks.classList.toggle('active');
+      document.body.style.overflow = isActive ? 'hidden' : '';
     });
 
     navLinks.querySelectorAll('a').forEach(link => {
       link.addEventListener('click', () => {
         navLinks.classList.remove('active');
+        document.body.style.overflow = '';
       });
+    });
+
+    document.addEventListener('click', (e) => {
+      if (navLinks.classList.contains('active') && !navLinks.contains(e.target) && !burgerBtn.contains(e.target)) {
+        navLinks.classList.remove('active');
+        document.body.style.overflow = '';
+      }
     });
   }
 }
@@ -347,14 +357,13 @@ function initBookingWizard() {
 
     fetch(url)
       .then(res => {
-        if (!res.ok) throw new Error('API unavailable');
+        if (!res.ok) throw new Error('API response not ok');
         return res.json();
       })
       .then(data => {
         renderSlots(data.slots || defaultSlots);
       })
       .catch(() => {
-        // Fallback for static GitHub Pages host
         renderSlots(defaultSlots);
       });
   }
@@ -512,7 +521,6 @@ function initBookingWizard() {
         }
       })
       .catch(() => {
-        // Fallback for static GitHub Pages host (localStorage persistence)
         submitBtn.disabled = false;
         submitBtn.textContent = 'Підтвердити бронювання';
 
